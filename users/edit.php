@@ -1,0 +1,132 @@
+<?php
+require_once "../auth/auth.php";
+requireRole(['admin']);
+$pageTitle = 'Edit Data Pengguna';
+require_once '../template/header.php';
+
+$id = mysqli_real_escape_string($connect, $_GET['id']);
+$data = mysqli_query($connect, "SELECT * FROM users WHERE id_user='$id'");
+$row = mysqli_fetch_assoc($data);
+
+if (!$row) {
+    echo "<script>alert('Data tidak ditemukan!');window.location='index.php';</script>";
+    exit;
+}
+?>
+
+<link rel="stylesheet" href="../assets/css/data.css">
+
+<?php if (($_GET['pesan'] ?? '') === 'duplikat_username'): ?>
+    <div class="alert alert-warning">Username sudah digunakan. Silakan gunakan username lain.</div>
+<?php elseif (($_GET['pesan'] ?? '') === 'duplikat_nama'): ?>
+    <div class="alert alert-warning">Nama sudah terdaftar untuk pengguna lain. Silakan gunakan nama yang berbeda.</div>
+<?php elseif (($_GET['pesan'] ?? '') === 'duplikat_email'): ?>
+    <div class="alert alert-warning">Email sudah dipakai pengguna lain. Gunakan email lain.</div>
+<?php elseif (($_GET['pesan'] ?? '') === 'email_kosong'): ?>
+    <div class="alert alert-warning">Email wajib diisi karena dipakai untuk lupa password.</div>
+<?php elseif (($_GET['pesan'] ?? '') === 'email_invalid'): ?>
+    <div class="alert alert-warning">Format email tidak valid.</div>
+<?php elseif (($_GET['pesan'] ?? '') === 'gagal'): ?>
+    <div class="alert alert-danger">Data pengguna tidak dapat disimpan. Periksa kembali isian data.</div>
+<?php endif; ?>
+
+<div class="container-fluid">
+
+    <a href="index.php" class="btn-back">
+        <i class="bi bi-arrow-left"></i>
+        Kembali
+    </a>
+
+    <div class="form-card">
+
+        <h3 class="form-title">Edit Data Pengguna</h3>
+        <p class="form-subtitle">Perbarui data pengguna yang telah tersimpan.</p>
+
+        <form action="update.php" method="POST">
+
+            <input type="hidden" name="id_user" value="<?= $row['id_user']; ?>">
+
+            <div class="form-group">
+                <label>Username <span class="required">*</span></label>
+
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="bi bi-person"></i>
+                    </span>
+
+                    <input type="text" name="username" class="form-control" value="<?= htmlspecialchars($row['username']); ?>" maxlength="50" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Nama <span class="required">*</span></label>
+
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="bi bi-person-vcard"></i>
+                    </span>
+
+                    <input type="text" name="nama" class="form-control" value="<?= htmlspecialchars($row['nama']); ?>" maxlength="100" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Email <span class="required">*</span></label>
+
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="bi bi-envelope"></i>
+                    </span>
+
+                    <input type="email" name="email" class="form-control" value="<?= htmlspecialchars($row['email'] ?? ''); ?>" placeholder="contoh: nama@gmail.com" maxlength="150" required>
+                </div>
+
+                <small class="text-muted">Dipakai untuk mengirim kode OTP saat lupa password.</small>
+            </div>
+
+            <div class="form-group">
+                <label>Role <span class="required">*</span></label>
+
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="bi bi-person-badge"></i>
+                    </span>
+                    <select name="role" class="form-select" required>
+                        <option value="">Pilih Role</option>
+                        <option value="admin" <?= $row['role'] == 'admin' ? 'selected' : ''; ?>>Admin</option>
+                        <option value="petugas" <?= $row['role'] == 'petugas' ? 'selected' : ''; ?>>Petugas</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="bi bi-lock"></i>
+                    </span>
+
+                    <input type="password" name="password" class="form-control" placeholder="Kosongkan jika tidak ingin mengubah password" maxlength="50">
+                </div>
+            </div>
+
+            <div class="form-footer">
+                <a href="index.php" class="btn-cancel">
+                    <i class="bi bi-arrow-left-circle"></i>
+                    Batal
+                </a>
+
+                <button type="submit" class="btn-update">
+                    <i class="bi bi-pencil-square"></i>
+                    Update Data
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<?php require_once '../template/footer.php'; ?>
